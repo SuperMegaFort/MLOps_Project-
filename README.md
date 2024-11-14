@@ -1,7 +1,21 @@
-# MLOps - Celestial Body Classification
+# Land Cover Classification with Satellite Imagery
 
-This repository contains the code from
-[A guide to MLOps](https://mlops.swiss-ai-center.ch/).
+This project demonstrates how to build a deep learning model to classify different types of land cover (e.g., urban areas, forests, water bodies) from satellite imagery. 
 
-## Notes
-<!-- Enter your notes below -->
+## Project Structure
+.
+├── data
+│   ├── raw
+│   │   └── ...
+│   └── README.md
+├── src 
+│   ├── utils
+│   │   ├── __init__.py
+│   │   └── seed.py
+│   ├── evaluate.py
+│   ├── prepare.py
+│   └── train.py
+├── README.md 
+├── params.yaml 
+├── requirements-freeze.txt 
+└── requirements.txt 
