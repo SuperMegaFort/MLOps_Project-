@@ -1,0 +1,16 @@
+## Python
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+
+.DS_Store
+
+## DVC
+
+# DVC plots
+dvc_plots
+
+
+# DVC will add new files after this line
+/model
