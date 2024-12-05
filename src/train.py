@@ -6,7 +6,6 @@ from typing import Tuple
 import numpy as np
 import tensorflow as tf
 import yaml
-import bentoml
 from PIL.Image import Image
 
 from utils.seed import set_seed
@@ -87,42 +86,8 @@ def main() -> None:
     # Save the model
     model_folder.mkdir(parents=True, exist_ok=True)
 
-    def preprocess(x: Image):
-        # convert PIL image to tensor
-        x = x.convert('L' if grayscale else 'RGB')
-        x = x.resize(image_size)
-        x = np.array(x)
-        x = x / 255.0
-        # add batch dimension
-        x = np.expand_dims(x, axis=0)
-        return x
-
-    def postprocess(x: Image):
-        return {
-            "prediction": labels[tf.argmax(x, axis=-1).numpy()[0]],
-            "probabilities": {
-                labels[i]: prob
-                for i, prob in enumerate(tf.nn.softmax(x).numpy()[0].tolist())
-            },
-        }
-
-    # Save the model using BentoML to its model store
-    # https://docs.bentoml.com/en/latest/reference/frameworks/keras.html#bentoml.keras.save_model
-    bentoml.keras.save_model(
-        "celestial_bodies_classifier_model",
-        model,
-        include_optimizer=True,
-        custom_objects={
-            "preprocess": preprocess,
-            "postprocess": postprocess,
-        }
-    )
-
-    # Export the model from the model store to the local model folder
-    bentoml.models.export_model(
-        "celestial_bodies_classifier_model:latest",
-        f"{model_folder}/celestial_bodies_classifier_model.bentomodel",
-    )
+    # **Enregistrement du modèle au format SavedModel**
+    model.save(f"{model_folder}/mlops_project_model.h5")
 
     # Save the model history
     np.save(model_folder / "history.npy", model.history.history)
