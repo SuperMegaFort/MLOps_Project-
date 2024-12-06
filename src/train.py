@@ -87,7 +87,7 @@ def main() -> None:
     model_folder.mkdir(parents=True, exist_ok=True)
 
     # **Enregistrement du modèle au format SavedModel**
-    model.save(f"{model_folder}/mlops_project_model.h5")
+    model.export(f"{model_folder}/mlops_project_model.savedmodel")
 
     # Save the model history
     np.save(model_folder / "history.npy", model.history.history)
