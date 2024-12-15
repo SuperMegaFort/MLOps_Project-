@@ -11,6 +11,8 @@ __pycache__/
 # DVC plots
 dvc_plots
 
+credential_sentinelle.csv
+satellite_image/
 
 # DVC will add new files after this line
 /model

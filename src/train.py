@@ -13,23 +13,35 @@ from utils.seed import set_seed
 
 def get_model(
     image_shape: Tuple[int, int, int],
-    conv_size: int,
     dense_size: int,
     output_classes: int,
 ) -> tf.keras.Model:
-    """Create a simple CNN model"""
-    model = tf.keras.models.Sequential(
+    """Create a model with MobileNetV2 as backbone."""
+    base_model = tf.keras.applications.MobileNetV2(
+        include_top=False,  # Exclude the final dense layers
+        weights="imagenet",  # Use pre-trained weights
+        input_shape=image_shape,
+    )
+
+    # Fine-tuning : Unfreeze the last 50 layers
+    base_model.trainable = True
+    for layer in base_model.layers[:-50]:
+        layer.trainable = False
+
+    # Custom classification layers
+    model = tf.keras.Sequential(
         [
-            tf.keras.layers.Conv2D(
-                conv_size, (3, 3), activation="relu", input_shape=image_shape
-            ),
-            tf.keras.layers.MaxPooling2D((3, 3)),
-            tf.keras.layers.Flatten(),
+            base_model,
+            tf.keras.layers.GlobalAveragePooling2D(),
+            tf.keras.layers.Dropout(0.3),
             tf.keras.layers.Dense(dense_size, activation="relu"),
-            tf.keras.layers.Dense(output_classes),
+            tf.keras.layers.BatchNormalization(),
+            tf.keras.layers.Dropout(0.3),
+            tf.keras.layers.Dense(output_classes, activation="softmax"),
         ]
     )
     return model
+
 
 
 def main() -> None:
@@ -68,7 +80,7 @@ def main() -> None:
         labels = json.load(f)
 
     # Define the model
-    model = get_model(image_shape, conv_size, dense_size, output_classes)
+    model = get_model(image_shape, dense_size, output_classes)
     model.compile(
         optimizer=tf.keras.optimizers.Adam(lr),
         loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -87,7 +99,11 @@ def main() -> None:
     model_folder.mkdir(parents=True, exist_ok=True)
 
     # **Enregistrement du modèle au format SavedModel**
-    model.export(f"{model_folder}/mlops_project_model.savedmodel")
+    #model.export(f"{model_folder}/mlops_project_model.savedmodel")
+   
+
+    model.save(f"{model_folder}/mobilenetv2_modified_classifier_model.h5")
+
 
     # Save the model history
     np.save(model_folder / "history.npy", model.history.history)

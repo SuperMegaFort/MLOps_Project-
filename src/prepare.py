@@ -6,6 +6,7 @@ from typing import List
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import yaml
+import tf2onnx
 
 from utils.seed import set_seed
 
@@ -82,6 +83,27 @@ def main() -> None:
         return image, label
 
     ds_train = ds_train.map(augment_data)
+
+    # Build a simple model for demonstration
+    model = tf.keras.Sequential(
+        [
+            tf.keras.layers.Flatten(input_shape=(image_size[0], image_size[1], 1 if grayscale else 3)),
+            tf.keras.layers.Dense(128, activation="relu"),
+            tf.keras.layers.Dense(len(labels), activation="softmax"),
+        ]
+    )
+
+    model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+    model.fit(ds_train, validation_data=ds_test, epochs=5)
+
+    # Save the model in SavedModel format
+    saved_model_dir = prepared_dataset_folder / "saved_model"
+    tf.saved_model.save(model, saved_model_dir)  # Correct method for SavedModel format
+
+    # Convert to ONNX
+    onnx_model_path = prepared_dataset_folder / "model.onnx"
+    model_proto, _ = tf2onnx.convert.from_saved_model(saved_model_dir, opset=13, output_path=str(onnx_model_path))
+    print(f"Model exported to ONNX format at {onnx_model_path}")
 
     # Save the prepared dataset
     with open(prepared_dataset_folder / "labels.json", "w") as f:
