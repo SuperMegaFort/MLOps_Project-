@@ -11,6 +11,8 @@ Before deploying this project, ensure you have the following:
 *   **Python 3:** Python 3 installed on your local machine.
 *   **Required Python Libraries:** Install the necessary Python libraries using pip:
  
+ ## Dowlaod images with sentinel.py
+ launch sentinel.py with the credential to download images
 
 ## Project Structure
 .
